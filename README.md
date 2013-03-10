@@ -13,4 +13,5 @@ These course notes by Charlie Sanders.
 ### Repository Organization
 
  * **`notes/`** &ndash; my notes from Prof. Schmidt's lectures in GitHub-flavored markdown format
+ * **`assignments/`** &ndash; course assignments
  * **`src/`** &ndash; source code for programs related to the course in various languages
