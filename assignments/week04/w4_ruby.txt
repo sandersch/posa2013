@@ -1,0 +1,71 @@
+#!/usr/bin/env ruby
+
+require 'thread'
+
+class PingPong
+  attr_reader :ping_count, :pong_count, :times_to_print
+
+  def initialize(times=3)
+    @ping_count = 0
+    @pong_count = 0
+    @times_to_print = times
+  end
+
+  def run
+    puts "Ready... Set... Go!\n\n"
+    [ping_thread, pong_thread].each(&:join)
+    puts "Done!"
+  end
+
+  protected
+
+  def ping_thread
+    Thread.new { ping while still_need_pings? }
+  end
+
+  def pong_thread
+    Thread.new { pong while still_need_pongs? }
+  end
+
+  def ping
+    mutex.synchronize do
+      if should_ping?
+        puts "Ping!"
+        self.ping_count += 1
+      end
+    end
+  end
+
+  def pong
+    mutex.synchronize do
+      if should_pong?
+        puts "Pong!"
+        self.pong_count += 1
+      end
+    end
+  end
+
+  def should_ping?
+    ping_count <= pong_count
+  end
+
+  def should_pong?
+    !should_ping?
+  end
+
+  def still_need_pings?
+    ping_count < times_to_print
+  end
+
+  def still_need_pongs?
+    pong_count < times_to_print
+  end
+
+  def mutex
+    @mutex ||= Mutex.new
+  end
+
+  attr_writer :ping_count, :pong_count
+end
+
+pp = PingPong.new.run
