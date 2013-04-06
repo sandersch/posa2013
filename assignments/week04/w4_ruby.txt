@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+# Tested with MRI 1.9.3 and 2.0, and latest Rubinius (rbx-head)
+
 require 'thread'
 
 class PingPong
@@ -20,29 +22,33 @@ class PingPong
   protected
 
   def ping_thread
-    Thread.new { ping while still_need_pings? }
+    Thread.new { try_to_ping while still_need_pings? }
   end
 
   def pong_thread
-    Thread.new { pong while still_need_pongs? }
+    Thread.new { try_to_pong while still_need_pongs? }
+  end
+
+  def try_to_ping
+    mutex.synchronize do
+      ping if should_ping?
+    end
+  end
+
+  def try_to_pong
+    mutex.synchronize do
+      pong if should_pong?
+    end
   end
 
   def ping
-    mutex.synchronize do
-      if should_ping?
-        puts "Ping!"
-        self.ping_count += 1
-      end
-    end
+    puts "Ping!"
+    self.ping_count += 1
   end
 
   def pong
-    mutex.synchronize do
-      if should_pong?
-        puts "Pong!"
-        self.pong_count += 1
-      end
-    end
+    puts "Pong!"
+    self.pong_count += 1
   end
 
   def should_ping?
